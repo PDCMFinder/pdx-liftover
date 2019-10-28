@@ -45,7 +45,8 @@ public class OmicHarmonizer {
 
         setOmicType(dataType);
         omicSheet = sheet;
-        logFileLocation = Paths.get(fileURI + "log");
+        Path parentPath = Paths.get(fileURI).getParent();
+        logFileLocation = Paths.get(parentPath.toString() + "data.tsv.log");
 
         outputSheet = new ArrayList<>();
         initHeaders();
@@ -94,7 +95,7 @@ public class OmicHarmonizer {
     }
 
     private void logLiftInfo(ArrayList<String> row) throws IOException {
-        String infoMSG = String.format("Genomic coordinates not lifted for row at index: %s. %n Row data : %s", omicSheet.indexOf(row), Arrays.toString(row.toArray()));
+        String infoMSG = String.format("******LIFTOVER*********/nGenomic coordinates not lifted for row at index: %s. %n Row data : %s", omicSheet.indexOf(row), Arrays.toString(row.toArray()));
         log.info(infoMSG);
         Files.write(logFileLocation, Collections.singleton(infoMSG), StandardCharsets.UTF_8);
     }
@@ -161,11 +162,11 @@ public class OmicHarmonizer {
     }
 
     protected boolean isHg37(ArrayList<String> row){
-        return row.get(genomeAssemblyCol).trim().matches("(?i)(37|19|Hg19|GRC37)");
+        return row.get(genomeAssemblyCol).trim().matches("(?i)(37|19|Hg19|GRCh37)");
     }
 
     protected void updateAssembly(ArrayList<String> row){
-        row.set(genomeAssemblyCol, "Hg38");
+        row.set(genomeAssemblyCol, "GRCh38");
     }
 
     protected int getColumnByHeader(String header) {
