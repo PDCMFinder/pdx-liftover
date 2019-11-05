@@ -46,7 +46,7 @@ public class OmicHarmonizer {
         setOmicType(dataType);
         omicSheet = sheet;
         Path parentPath = Paths.get(fileURI).getParent();
-        logFileLocation = Paths.get(parentPath.toString() + "data.tsv.log");
+        logFileLocation = Paths.get(parentPath.toString() + "/data.log");
 
         outputSheet = new ArrayList<>();
         initHeaders();
@@ -82,6 +82,7 @@ public class OmicHarmonizer {
 
         for (ArrayList<String> row : omicSheet)
 
+            //@TODO genomeAssemlby col assumes it is in last. Not Best
             if (((!row.isEmpty()) && row.size() > genomeAssemblyCol) && isHg37(row)) {
 
                 Map<String, long[]> liftedData = lifter.liftOverCoordinates(getRowsGenomicCoor(row));
@@ -95,7 +96,7 @@ public class OmicHarmonizer {
     }
 
     private void logLiftInfo(ArrayList<String> row) throws IOException {
-        String infoMSG = String.format("******LIFTOVER*********/nGenomic coordinates not lifted for row at index: %s. %n Row data : %s", omicSheet.indexOf(row), Arrays.toString(row.toArray()));
+        String infoMSG = String.format("******LIFTOVER********* \n Genomic coordinates not lifted for row at index: %s. %n Row data : %s", omicSheet.indexOf(row), Arrays.toString(row.toArray()));
         log.info(infoMSG);
         Files.write(logFileLocation, Collections.singleton(infoMSG), StandardCharsets.UTF_8);
     }

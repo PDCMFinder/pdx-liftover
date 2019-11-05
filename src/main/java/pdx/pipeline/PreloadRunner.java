@@ -63,7 +63,7 @@ public class PreloadRunner implements CommandLineRunner {
                 if (!(outFile.size() == 1 || outFile.isEmpty()))
                     makeOutFileDirAndSave(f, outFile);
                 else
-                    log.info(String.format("No data lifted for %s",f.getName()));
+                    log.info(String.format("No data lifted for %s",f.getCanonicalPath()));
             } catch (IOException e) {
                 log.error(e.toString());
             }
