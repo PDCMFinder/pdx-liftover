@@ -56,6 +56,7 @@ public class PreloadRunner implements CommandLineRunner {
 
             OmicHarmonizer.OMIC dataType = determineOmicType(f);
             ArrayList<ArrayList<String>> sheet = getSheet(f);
+            logPreLiftStatistics(f,sheet);
             ArrayList<ArrayList<String>> outFile;
 
             try {
@@ -68,6 +69,11 @@ public class PreloadRunner implements CommandLineRunner {
                 log.error(e.toString());
             }
         });
+    }
+
+    private void logPreLiftStatistics(File file, ArrayList<ArrayList<String>> sheet) {
+
+        String stats = String.format("%s Contains %d preliftedData points", file.getName(), sheet.size());
     }
 
     private void makeOutFileDirAndSave(File f,ArrayList<ArrayList<String>> liftedSheet) throws IOException {

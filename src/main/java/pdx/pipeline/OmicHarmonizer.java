@@ -5,9 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 
 public class OmicHarmonizer {
@@ -31,10 +29,14 @@ public class OmicHarmonizer {
     private static final String SEQENDPOS = "seq_end_position";
     private static final String GENOMEASSEMBLY = "genome_assembly";
     private static final String ERRORSTR = "ERROR LIFTING";
+    private static final int BROKEN_ROW_THRESHOLD = 25;
+
+    private static int brokenRowCount = 0;
 
     private PDXLiftOver lifter = new PDXLiftOver();
 
     Logger log = LoggerFactory.getLogger(OmicHarmonizer.class);
+    String workingFile;
     Path logFileLocation;
 
     OmicHarmonizer(String chain) {
@@ -45,6 +47,7 @@ public class OmicHarmonizer {
 
         setOmicType(dataType);
         omicSheet = sheet;
+        workingFile = fileURI;
         Path parentPath = Paths.get(fileURI).getParent();
         logFileLocation = Paths.get(parentPath.toString() + "/data.log");
 
@@ -79,32 +82,66 @@ public class OmicHarmonizer {
     }
 
     private void iterateThruLiftOver() throws IOException {
+        for (ArrayList<String> row : omicSheet) {
 
-        for (ArrayList<String> row : omicSheet)
+            if (omicSheet.indexOf(row) == 0) continue;
 
-            //@TODO genomeAssemlby col assumes it is in last. Not Best
-            if (((!row.isEmpty()) && row.size() > genomeAssemblyCol) && isHg37(row)) {
+            if (hasGenomeAssemblyColAndisHg37(row)) {
 
                 Map<String, long[]> liftedData = lifter.liftOverCoordinates(getRowsGenomicCoor(row));
-                if ((liftedData.isEmpty()||liftedData.containsKey(ERRORSTR)||liftedData.containsValue(-1))) {
-                    logLiftInfo(row);
+                if ((liftedData.isEmpty() || liftedData.containsKey(ERRORSTR) || liftedData.containsValue(-1))) {
+                    String infoMsg = String.format("LiftOver: Genomic coordinates not lifted for row at index: %s. %n Row data : %s", omicSheet.indexOf(row), Arrays.toString(row.toArray()));
+                    logLiftInfo(row, infoMsg);
 
-                } else {
+                }
+                else {
                     harmonizeData(liftedData, row);
                 }
             }
+            else if (hasGenomeAssemblyColAndisHg38(row)) {
+                outputSheet.add(row);
+            }
+            else {
+                String mgs = String.format("LiftOver: row does not have Genome Assemlby colum. Index : %s Row data: %s", omicSheet.indexOf(row), Arrays.toString(row.toArray()));
+                logLiftInfo(row, mgs);
+                if (brokenThresholdIsMet()) {
+                    String alterMSG = String.format("LiftOver: **********************BROKEN COLUMN THRESHOLD MET IN %s********************** \n **********************Stopped reading file**********************", workingFile);
+                    logLiftInfo(row,alterMSG);
+                    break;
+                }
+            }
+        }
+        brokenRowCount = 0;
     }
 
-    private void logLiftInfo(ArrayList<String> row) throws IOException {
-        String infoMSG = String.format("******LIFTOVER********* \n Genomic coordinates not lifted for row at index: %s. %n Row data : %s", omicSheet.indexOf(row), Arrays.toString(row.toArray()));
-        log.info(infoMSG);
-        Files.write(logFileLocation, Collections.singleton(infoMSG), StandardCharsets.UTF_8);
+    protected boolean brokenThresholdIsMet() {
+        return ((++brokenRowCount) >= BROKEN_ROW_THRESHOLD);
     }
+
+    protected boolean hasGenomeAssemblyColAndisHg37(ArrayList<String> row){
+        return row.size() > genomeAssemblyCol && row.get(genomeAssemblyCol).trim().matches("(?i)(37|19|Hg19|GRCh37)");
+    }
+
+    protected boolean hasGenomeAssemblyColAndisHg38(ArrayList<String> row){
+        return row.size() > genomeAssemblyCol && row.get(genomeAssemblyCol).trim().matches("(?i)(38|hg38|grch38)");
+    }
+
+    private void logLiftInfo(ArrayList<String> row, String message) throws IOException {
+        log.info(message);
+        if(logFileLocation.toFile().exists()) {
+            Files.write(logFileLocation, Collections.singleton(message), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+        }
+        else {
+            Files.write(logFileLocation, Collections.singleton(message), StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+        }
+        }
 
     private void harmonizeData(Map<String,long[]> liftedData, ArrayList<String> row){
-        mergeLiftDataWithRowData(liftedData, row);
-        updateAssembly(row);
-        outputSheet.add(row);
+
+        ArrayList<String> rowOut = new ArrayList<>(row);
+        mergeLiftDataWithRowData(liftedData, rowOut);
+        updateAssembly(rowOut);
+        outputSheet.add(rowOut);
     }
 
     private Map<String, long[]> getRowsGenomicCoor(ArrayList<String> row){
@@ -115,7 +152,7 @@ public class OmicHarmonizer {
 
         if(row.size() > chromosomeColumn && row.size() > seqStartPositionCol && row.size() > seqEndPositionCol) {
              rowChromosome = row.get(chromosomeColumn);
-             rowStartPos = getAndValidateNum(row, seqStartPositionCol);
+             rowStartPos = getAndValidateSeqCoorNum(row, seqStartPositionCol);
              endPos = getSeqEndPosition(row);
         } else log.error("Error column size is less then header at index: " + omicSheet.indexOf(row));
 
@@ -128,19 +165,19 @@ public class OmicHarmonizer {
          return genomCoors;
     }
 
-    private long getAndValidateNum(ArrayList<String> row, int colNum){
+    private long getAndValidateSeqCoorNum(ArrayList<String> row, int colNum){
         return Long.parseLong(validateNumStr(row.get(colNum)));
     }
 
-    private String validateNumStr(String numStr){
-        return numStr.trim().equals("") ? "-1" : numStr;
+    private String validateNumStr(String num){
+        return num.trim().equals("") ? "-1" : num;
     }
 
     private long getSeqEndPosition(ArrayList<String> row) {
 
         long endPos = -1;
-        if(omicType.equals(OMIC.CNA)) endPos = getAndValidateNum(row, seqEndPositionCol);
-        else if(omicType.equals(OMIC.MUT)) endPos = getAndValidateNum(row, seqStartPositionCol);
+        if(omicType.equals(OMIC.CNA)) endPos = getAndValidateSeqCoorNum(row, seqEndPositionCol);
+        else if(omicType.equals(OMIC.MUT)) endPos = getAndValidateSeqCoorNum(row, seqStartPositionCol);
         return endPos;
     }
 
@@ -160,10 +197,6 @@ public class OmicHarmonizer {
 
             setSeqEndPos(row, String.valueOf(entry.getValue()[1]));
         }
-    }
-
-    protected boolean isHg37(ArrayList<String> row){
-        return row.get(genomeAssemblyCol).trim().matches("(?i)(37|19|Hg19|GRCh37)");
     }
 
     protected void updateAssembly(ArrayList<String> row){

@@ -32,7 +32,14 @@ public class OmicCrawler {
 
             String updog = String.format("%s/data/UPDOG", rootDir);
 
-            List<File> providerFolders = Arrays.asList(new File(updog).listFiles());
+            File whatUpDog = new File(updog);
+            List<File> providerFolders = null;
+
+            if (whatUpDog != null) {
+                providerFolders = Arrays.asList(whatUpDog.listFiles());
+            } else {
+                System.out.println("You need to point the Pipeline to the dirname of the Data/Updog structure");
+            }
 
             providersData = returnMutAndCNASubFolders(providerFolders);
 
@@ -95,7 +102,7 @@ public class OmicCrawler {
         providersData.forEach(f ->
             variantData.addAll
                     (Arrays.stream(f.listFiles())
-                            .filter(t -> t.getName().equals("data.xlsx"))
+                            .filter(t -> t.getName().matches("(.+xlsx|tsv|csv)"))
                             .collect(Collectors.toCollection(ArrayList::new)))
         );
         return variantData;

@@ -15,8 +15,6 @@ public class PDXLiftOver {
     private static final long ERRORLONG = -1;
     private String chainFileURI;
 
-    Logger log = LoggerFactory.getLogger(PDXLiftOver.class);
-
     private Map<String,long[]> errorFlag = new LinkedHashMap<>();
 
 
@@ -83,11 +81,11 @@ public class PDXLiftOver {
     }
 
     private String changeStringToChainFormat(String chromo){
-        return chromo.toUpperCase().replaceAll("(?i)([0-9]{1,2}|[xym])", "chr$1");
+        return chromo.toUpperCase().replaceAll("(?i)([0-9]{1,2}|[xym]|Un)", "chr$1");
     }
 
     private boolean notChainFormat(String chromo){
-        return ! chromo.matches("chr([0-9]{1,2}|[XYM])");
+        return ! chromo.matches("(?i)chr([0-9]{1,2}|[XYM]|Un)");
     }
 
     public File getChainFile(){

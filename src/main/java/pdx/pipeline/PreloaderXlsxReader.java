@@ -92,11 +92,7 @@ public class PreloaderXlsxReader {
                 break;
 
             case Cell.CELL_TYPE_NUMERIC:
-                value = cleanFloat(
-                            cleanSpaces(
-                                (String.valueOf
-                                    ((int) currentCell.getNumericCellValue())))
-                );
+                value = toStringFormatFactory(currentCell.getNumericCellValue());
                 break;
 
             default:
@@ -105,13 +101,27 @@ public class PreloaderXlsxReader {
         }
         return value;
     }
+    private static String toStringFormatFactory(double cellNum){
 
-    private static String cleanFloat(String floatValue) {
-        String regex = "(\\d.{1,20})\\.[0]{1,20}";
-        return floatValue.replaceAll(regex, "$1");
+        String matchSciNotation = "^\\d\\.\\d{1,11}E\\d{1,2}$";
+        String matchTrailingZeros = "^\\d{1,11}\\.0{1,10}$";
+
+        String formattedNum;
+        String longToParse = cleanSpaces(String.valueOf(cellNum));
+        if (longToParse.matches(matchSciNotation)){
+            formattedNum = String.format("%.0f", cellNum);
+        }
+        else if(longToParse.matches(matchTrailingZeros)) {
+            formattedNum = String.valueOf((int) cellNum);
+        }
+        else {
+           formattedNum = longToParse;
+        }
+        return formattedNum;
     }
 
-        private static String cleanSpaces(String stringToClean) {
+
+    private static String cleanSpaces(String stringToClean) {
         return stringToClean.trim();
     }
 
