@@ -28,7 +28,7 @@ public class PreloadRunner implements CommandLineRunner {
     private OmicCrawler crawler = new OmicCrawler();
     private PreloaderXlsxReader reader = new PreloaderXlsxReader();
     private OmicHarmonizer harmonizer = new OmicHarmonizer(CHAINFILE);
-    private TSVutils tsvUtil = new TSVutils();
+    private TsvUtils tsvUtil = new TsvUtils();
 
     private static final String CHAINFILE = "src/main/resources/LiftOverResources/hg19ToHg38.over.chain.gz";
 
@@ -107,7 +107,26 @@ public class PreloadRunner implements CommandLineRunner {
        else return null;
     }
 
-    private ArrayList<ArrayList<String>> getSheet(File f){
+    private ArrayList<ArrayList<String>> getSheet(File fileToRead){
+
+        String filename = fileToRead.getName();
+        ArrayList<ArrayList<String>> sheet;
+
+        if (filename.matches(".+xlsx")){
+            sheet = getXlsxSheet(fileToRead);
+        }else if (filename.matches(".+tsv")) {
+            sheet = tsvUtil.readCsv(fileToRead.getAbsolutePath(), "\t");
+        } else if (filename.matches(".+csv")) {
+            sheet = tsvUtil.readCsv(fileToRead.getAbsolutePath(), ",");
+        } else {
+            System.err.println("FILETYPE NOT SUPPORTED");
+            sheet = null;
+        }
+        return sheet;
+    }
+
+
+    private ArrayList<ArrayList<String>> getXlsxSheet(File f){
 
         ArrayList<ArrayList<String>> sheet = null;
         try {
