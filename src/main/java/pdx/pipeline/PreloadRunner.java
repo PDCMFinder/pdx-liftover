@@ -78,15 +78,15 @@ public class PreloadRunner implements CommandLineRunner {
 
     private void makeOutFileDirAndSave(File f,ArrayList<ArrayList<String>> liftedSheet) throws IOException {
 
-        String sourceNameRegex = "(?i).{1,150}UPDOG/(.{1,10})/.{1,3}";
-        String datatypeRegex = "(?i).{1,50}UPDOG/.{1,10}/(.{1,3})";
-        String sourceDir = f.getParent().replaceAll(sourceNameRegex, "$1");
-        String dataType = f.getParent().replaceAll(datatypeRegex, "$1");
+        Path filePath = Paths.get(f.toURI());
+
+        String sourceDir = filePath.getParent().getParent().getFileName().toString();
+        String parentDataDir = filePath.getParent().getFileName().toString();
 
         Path outputRoot = Paths.get(URI.create("file://" + finderRootDir));
         Path updog = Paths.get(outputRoot.toString() + "/data/UPDOG");
         Path sourceFolder = Paths.get(updog.toString() + "/" + sourceDir);
-        Path sourceData = Paths.get(sourceFolder.toString() + "/" + dataType);
+        Path sourceData = Paths.get(sourceFolder.toString() + "/" + parentDataDir);
         Path outFile = Paths.get(sourceData.toString() + "/data.tsv");
 
         if(!outputRoot.toFile().exists())

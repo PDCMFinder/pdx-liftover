@@ -54,8 +54,6 @@ public class OmicCrawler {
 
         ArrayList<File> providers = new ArrayList<>();
 
-
-
         rootDir.forEach(f ->
                 {
                     if(f.exists() && f.isDirectory()
@@ -91,10 +89,12 @@ public class OmicCrawler {
 
     private ArrayList<File> getVariantdata(ArrayList<File> providersData) {
 
-        if( ! providersData.isEmpty())
+        if( ! providersData.isEmpty()) {
             return returnMutAndCNAFiles(providersData);
-        else
+        }
+        else {
             return new ArrayList<>();
+        }
     }
 
     private ArrayList<File> returnMutAndCNAFiles(List<File> providersData) {
@@ -102,7 +102,7 @@ public class OmicCrawler {
         providersData.forEach(f ->
             variantData.addAll
                     (Arrays.stream(f.listFiles())
-                            .filter(t -> t.getName().matches("(.+xlsx|tsv|csv)"))
+                            .filter(t -> t.getName().matches(".+(xlsx|tsv|csv)"))
                             .collect(Collectors.toCollection(ArrayList::new)))
         );
         return variantData;
