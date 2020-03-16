@@ -48,12 +48,9 @@ public class PreloadRunner implements CommandLineRunner {
     }
 
     public void runLiftOver() throws IOException {
-
-
         List<File> omicFiles = crawler.run(new File(finderRootDir));
 
         omicFiles.forEach(f -> {
-
             OmicHarmonizer.OMIC dataType = determineOmicType(f);
             ArrayList<ArrayList<String>> sheet = getSheet(f);
             logPreLiftStatistics(f,sheet);
@@ -72,7 +69,6 @@ public class PreloadRunner implements CommandLineRunner {
     }
 
     private void logPreLiftStatistics(File file, ArrayList<ArrayList<String>> sheet) {
-
         String stats = String.format("%s Contains %d preliftedData points", file.getName(), sheet.size());
     }
 
@@ -85,14 +81,15 @@ public class PreloadRunner implements CommandLineRunner {
 
         Path outputRoot = Paths.get(URI.create("file://" + finderRootDir));
         Path updog = Paths.get(outputRoot.toString() + "/data/UPDOG");
-        Path sourceFolder = Paths.get(updog.toString() + "/" + sourceDir);
-        Path sourceData = Paths.get(sourceFolder.toString() + "/" + parentDataDir);
-        Path outFile = Paths.get(sourceData.toString() + "/data.tsv");
+        Path sourceFolder;
 
-        if(!outputRoot.toFile().exists())
-            Files.createDirectory(outputRoot);
-        if(!updog.toFile().exists())
-            Files.createDirectory(updog);
+        if(!outputRoot.toFile().exists()) Files.createDirectory(outputRoot);
+        if(updog.toFile().exists()) sourceFolder = Paths.get(updog.toString() + "/" + sourceDir);
+        else sourceFolder = outputRoot;
+
+        Path sourceData = Paths.get(sourceFolder.toString() + "/" + parentDataDir);
+        Path outFile = Paths.get(sourceData.toString() + "/"+f.getName() + ".lfted");
+
         if(!sourceFolder.toFile().exists())
             Files.createDirectory(sourceFolder);
         if(!sourceData.toFile().exists())
@@ -108,7 +105,6 @@ public class PreloadRunner implements CommandLineRunner {
     }
 
     private ArrayList<ArrayList<String>> getSheet(File fileToRead){
-
         String filename = fileToRead.getName();
         ArrayList<ArrayList<String>> sheet;
 
@@ -127,7 +123,6 @@ public class PreloadRunner implements CommandLineRunner {
 
 
     private ArrayList<ArrayList<String>> getXlsxSheet(File f){
-
         ArrayList<ArrayList<String>> sheet = null;
         try {
             sheet = reader.readFirstSheet(f);

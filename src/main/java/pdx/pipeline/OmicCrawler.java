@@ -27,33 +27,26 @@ public class OmicCrawler {
     }
 
     public List<File> searchFileTreeForOmicData(File rootDir) throws IOException {
-
         if(folderExists(rootDir)) {
-
             String updog = String.format("%s/data/UPDOG", rootDir);
-
             File whatUpDog = new File(updog);
-            List<File> providerFolders = null;
+            List<File> providerFolders;
 
-            if (whatUpDog != null) {
+            if (whatUpDog.exists()) {
                 providerFolders = Arrays.asList(whatUpDog.listFiles());
             } else {
-                System.out.println("You need to point the Pipeline to the dirname of the Data/Updog structure");
+                System.out.println("No Updog found. Default to folder search mode");
+                providerFolders = new ArrayList<>();
+                providerFolders.add(rootDir);
             }
-
             providersData = returnMutAndCNASubFolders(providerFolders);
-
             variantData = getVariantdata(providersData);
-
         } else throw new IOException("Error root directory could not be found by the OmicCrawler");
-
         return variantData;
     }
 
     private ArrayList<File> returnMutAndCNASubFolders(List<File> rootDir){
-
         ArrayList<File> providers = new ArrayList<>();
-
         rootDir.forEach(f ->
                 {
                     if(f.exists() && f.isDirectory()
@@ -69,9 +62,7 @@ public class OmicCrawler {
     }
 
     private String getFileFilter() {
-
         String regexFilter = "";
-
         switch(crawlerSetting)
         {
             case CNA :
@@ -83,12 +74,10 @@ public class OmicCrawler {
             default:
                 regexFilter = "(?i)(MUT|CNA)";
         }
-
         return regexFilter;
     }
 
     private ArrayList<File> getVariantdata(ArrayList<File> providersData) {
-
         if( ! providersData.isEmpty()) {
             return returnMutAndCNAFiles(providersData);
         }
@@ -98,7 +87,6 @@ public class OmicCrawler {
     }
 
     private ArrayList<File> returnMutAndCNAFiles(List<File> providersData) {
-
         providersData.forEach(f ->
             variantData.addAll
                     (Arrays.stream(f.listFiles())

@@ -46,20 +46,22 @@ public class OmicHarmonizer {
     protected ArrayList<ArrayList<String>> runLiftOver(ArrayList<ArrayList<String>> sheet, String fileURI, OMIC dataType) throws IOException {
 
         setOmicType(dataType);
-        omicSheet = sheet;
-        workingFile = fileURI;
-        Path parentPath = Paths.get(fileURI).getParent();
-        logFileLocation = Paths.get(parentPath.toString() + "/data.log");
+        if(sheet.size() > 0) {
+            omicSheet = sheet;
+            workingFile = fileURI;
+            Path parentPath = Paths.get(fileURI).getParent();
+            logFileLocation = Paths.get(parentPath.toString() + "/data.log");
 
-        outputSheet = new ArrayList<>();
-        initHeaders();
+            outputSheet = new ArrayList<>();
+            initHeaders();
 
-        if(headersAreNotMissing()) {
-            outputSheet.add(getHeaders());
-            iterateThruLiftOver();
-        }
-        else throw new IOException("Headers are not found on file" );
-        return outputSheet;
+            if (headersAreNotMissing()) {
+                outputSheet.add(getHeaders());
+                log.info(String.format("Lifitng file %s", fileURI));
+                iterateThruLiftOver();
+            } else log.error(String.format("Headers not found on file %s", fileURI));
+        } else log.error(String.format("File appears to be empty %s", fileURI));
+            return outputSheet;
     }
 
     private void initHeaders() {
@@ -83,16 +85,12 @@ public class OmicHarmonizer {
 
     private void iterateThruLiftOver() throws IOException {
         for (ArrayList<String> row : omicSheet) {
-
             if (omicSheet.indexOf(row) == 0) continue;
-
             if (hasGenomeAssemblyColAndisHg37(row)) {
-
                 Map<String, long[]> liftedData = lifter.liftOverCoordinates(getRowsGenomicCoor(row));
                 if ((liftedData.isEmpty() || liftedData.containsKey(ERRORSTR) || liftedData.containsValue(-1))) {
                     String infoMsg = String.format("LiftOver: Genomic coordinates not lifted for row at index: %s. %n Row data : %s", omicSheet.indexOf(row), Arrays.toString(row.toArray()));
                     logLiftInfo(row, infoMsg);
-
                 }
                 else {
                     harmonizeData(liftedData, row);
