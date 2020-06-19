@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class PreloaderXlsxReader {
+public class XlsxReader {
 
-    Logger log = LoggerFactory.getLogger(PreloaderXlsxReader.class);
+    Logger log = LoggerFactory.getLogger(XlsxReader.class);
 
     Optional<Workbook> xslxWorkbook;
     ArrayList<ArrayList<String>> sheetData = null;

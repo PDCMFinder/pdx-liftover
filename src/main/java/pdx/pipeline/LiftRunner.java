@@ -18,15 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class PreloadRunner implements CommandLineRunner {
+public class LiftRunner implements CommandLineRunner {
 
     @Value("${pdxfinder.root.dir}")
     private String finderRootDir;
 
-    private Logger log = LoggerFactory.getLogger(PreloadRunner.class);
+    private Logger log = LoggerFactory.getLogger(LiftRunner.class);
 
     private OmicCrawler crawler = new OmicCrawler();
-    private PreloaderXlsxReader reader = new PreloaderXlsxReader();
+    private XlsxReader reader = new XlsxReader();
     private OmicHarmonizer harmonizer = new OmicHarmonizer(CHAINFILE);
     private TsvUtils tsvUtil = new TsvUtils();
 
@@ -48,6 +48,7 @@ public class PreloadRunner implements CommandLineRunner {
     }
 
     public void runLiftOver() throws IOException {
+        System.out.println("Run directory: " + finderRootDir);
         List<File> omicFiles = crawler.run(new File(finderRootDir));
 
         omicFiles.forEach(f -> {

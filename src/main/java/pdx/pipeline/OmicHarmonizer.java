@@ -50,7 +50,7 @@ public class OmicHarmonizer {
             omicSheet = sheet;
             workingFile = fileURI;
             Path parentPath = Paths.get(fileURI).getParent();
-            logFileLocation = Paths.get(parentPath.toString() + "/data.log");
+            logFileLocation = Paths.get(parentPath.toString() + "/lift.log");
 
             outputSheet = new ArrayList<>();
             initHeaders();
