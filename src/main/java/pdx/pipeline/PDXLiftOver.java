@@ -6,8 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PDXLiftOver {
 
@@ -18,42 +17,40 @@ public class PDXLiftOver {
     private Map<String,long[]> errorFlag = new LinkedHashMap<>();
 
 
-    Map<String,long[]> liftOverCoordinates(Map<String, long[]> genomeCoord) {
-
+    public Map<String,long[]> liftOverCoordinates(Map<String, long[]> genomeCoord) {
         errorFlag.put(ERRORSTR, new long[] {ERRORLONG, ERRORLONG} );
-
         return executeLiftOver(genomeCoord);
     }
 
     private Map<String,long[]> executeLiftOver(Map<String,long[]> genomeCoord) {
-
-            LiftOver liftOver = new LiftOver(getChainFile());
-
-            Interval inputInterval = mapToInterval(genomeCoord);
+        LiftOver liftOver = new LiftOver(getChainFile());
+        Map<String,long[]> allIntervals = new LinkedHashMap<>();
+        genomeCoord.entrySet().forEach(entry  -> {
+            Interval inputInterval = entryToInterval(entry);
             Interval outputInterval;
-
             try {
                 outputInterval = liftOver.liftOver(inputInterval);
             } catch(IllegalArgumentException e){
                 outputInterval = null;
             }
-
-            if(outputInterval == null) return errorFlag;
-            else return intervalToMap(outputInterval);
+            if(outputInterval == null) {
+                allIntervals.putAll(errorFlag);
+            }
+            else {
+                allIntervals.putAll(intervalToMap(outputInterval));
+            }
+        });
+        return allIntervals;
     }
-
     private Map<String,long[]> intervalToMap(Interval interval){
-
-        Map<String,long[]> map = new LinkedHashMap<>();
+        Map<String,long[]> map = new HashMap<>();
         String vcfFormatChromo = harmonizeChromoToVCF(interval.getSequence());
         map.put(vcfFormatChromo,
                 new long[]{interval.getStart(), interval.getEnd()} );
-
         return map;
     }
 
-    private Interval mapToInterval(Map<String,long[]> map) {
-        Map.Entry<String, long[]> entry = map.entrySet().iterator().next();
+    private Interval entryToInterval(Map.Entry<String,long[]> entry) {
         String harmonizedChromo = harmonizeChromoToChain(entry.getKey());
         return new Interval(harmonizedChromo, (int) entry.getValue()[0], (int) entry.getValue()[1]);
     }
@@ -67,6 +64,7 @@ public class PDXLiftOver {
         String formatedChromo = chromo.trim();
         String completeExpression = "^.+";
 
+        //TODO validate mitochondrial assemblies are sane
         if(notChainFormat(chromo)) {
             if (matchesMitoCase(chromo))
                 formatedChromo = chromo.replaceAll(completeExpression, "chrM");

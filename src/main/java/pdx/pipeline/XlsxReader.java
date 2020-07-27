@@ -45,7 +45,7 @@ public class XlsxReader {
         return Optional.empty();
     }
 
-    protected ArrayList<ArrayList<String>> iterateThroughSheet(Sheet sheet) {
+    public ArrayList<ArrayList<String>> iterateThroughSheet(Sheet sheet) {
 
         ArrayList<ArrayList<String>> listOfCellLists = new ArrayList<>();
 
