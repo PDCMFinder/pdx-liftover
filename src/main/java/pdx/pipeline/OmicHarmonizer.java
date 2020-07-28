@@ -54,7 +54,7 @@ public class OmicHarmonizer {
             initHeaders();
             if (headersAreNotMissing()) {
                 outputSheet.add(getHeaders());
-                log.info(String.format("Lifitng file %s", fileURI));
+                log.info(String.format("Lifting file %s", fileURI));
                 iterateThruLiftOver();
             } else log.error(String.format("Headers not found on file %s", fileURI));
         } else log.error(String.format("File appears to be empty %s", fileURI));
@@ -80,8 +80,8 @@ public class OmicHarmonizer {
         for (ArrayList<String> row : omicSheet) {
             if (omicSheet.indexOf(row) == 0) continue;
             if (hasGenomeAssemblyColAndisHg37(row)) {
-                Map<String, long[]> liftedData = lifter.liftOverCoordinates(getRowsGenomicCoor(row));
-                if ((liftedData.isEmpty() || liftedData.containsKey(ERRORSTR) || liftedData.containsValue(-1))) {
+                List<String> liftedData = lifter.liftOverCoordinates(getRowsGenomicCoor(row));
+                if ((liftedData.isEmpty() || liftedData.contains(ERRORSTR) || liftedData.contains("-1"))) {
                     String infoMsg = String.format("LiftOver: Genomic coordinates not lifted for row at index: %s. %n Row data : %s", omicSheet.indexOf(row), Arrays.toString(row.toArray()));
                     logLiftInfo(row, infoMsg);
                 }
@@ -127,7 +127,7 @@ public class OmicHarmonizer {
         }
         }
 
-    private void harmonizeData(Map<String,long[]> liftedData, ArrayList<String> row){
+    private void harmonizeData(List<String> liftedData, ArrayList<String> row){
         ArrayList<String> rowOut = new ArrayList<>(row);
         mergeLiftDataWithRowData(liftedData, rowOut);
         updateAssembly(rowOut);
@@ -142,13 +142,14 @@ public class OmicHarmonizer {
                 rowChromosome = row.get(chromosomeColumn);
                 rowStartPos = getAndValidateSeqCoorNum(row, seqStartPositionCol);
                 endPos = getSeqEndPosition(row);
+                if(rowChromosome.equals("")) log.info("No Chromsome information found for index " + omicSheet.indexOf(row));
+                if(rowStartPos == -1 || endPos == -1) log.info("Start or end pos missing in " + omicSheet.indexOf(row));
         } else log.error("Error column size is less then header at index: " + omicSheet.indexOf(row));
-        if(rowChromosome.equals("")) log.info("No Chromsome information found for index " + omicSheet.indexOf(row));
-        if(rowStartPos == -1 || endPos == -1) log.info("Start or end pos missing in " + omicSheet.indexOf(row));
+
         Map<String, long[]> genomCoors = new LinkedHashMap<>();
         if(omicType.equals(OMIC.CNA)) {
-            genomCoors.put(rowChromosome, new long[]{rowStartPos, rowStartPos});
-            genomCoors.put(rowChromosome, new long[]{endPos, endPos});
+            genomCoors.put(rowChromosome + "_start", new long[]{rowStartPos, rowStartPos});
+            genomCoors.put(rowChromosome + "_stop", new long[]{endPos, endPos});
         } else {
             genomCoors.put(rowChromosome, new long[]{rowStartPos, endPos});
         }
@@ -174,18 +175,14 @@ public class OmicHarmonizer {
         if (omicType.equals(OMIC.CNA)) row.set(seqEndPositionCol, endPos);
     }
 
-    private void mergeLiftDataWithRowData(Map<String,long[]> liftedData, ArrayList<String>row) {
-            Iterator<Map.Entry<String,long[]>> iterator = liftedData.entrySet().iterator();
-            while(iterator.hasNext()){
-                Map.Entry<String,long[]> genomicCoor = iterator.next();
-                row.set(chromosomeColumn,genomicCoor.getKey());
-                row.set(seqStartPositionCol,String.valueOf(genomicCoor.getValue()[0]));
-                if(omicType.equals(OMIC.CNA)) {
-                    Map.Entry<String, long[]> endCoor = iterator.next();
-                    setSeqEndPos(row, String.valueOf(endCoor.getValue()[0]));
-            }
+    private void mergeLiftDataWithRowData(List<String> liftedData, ArrayList<String>row) {
+        row.set(chromosomeColumn, liftedData.get(0));
+        row.set(seqStartPositionCol, liftedData.get(1));
+        if(omicType.equals(OMIC.CNA) && liftedData.size() >= 6) {
+            row.set(seqEndPositionCol, liftedData.get(5));
         }
     }
+
 
     protected void updateAssembly(ArrayList<String> row){
         row.set(genomeAssemblyCol, "GRCh38");

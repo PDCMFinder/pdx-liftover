@@ -25,12 +25,8 @@ public class OmicHarmonizerTests {
     private static final int ERROR = -1;
     private static final int MUTCOLUMNSIZE = 23;
     private static final int CNACOLUMNSIZE = 20;
-    private static final String CHAINFILE = "/home/afollette/IdeaProjects/pdxFinder/indexer/src/main/resources/LiftOverResources/hg19ToHg38.over.chain.gz";
+    private static final String CHAINFILE = "./src/main/resources/LiftOverResources/hg19ToHg38.over.chain.gz";
     private OmicHarmonizer harmonizer = new OmicHarmonizer(CHAINFILE);
-    
-    public OmicHarmonizerTests() throws IOException {
-    }
-
 
     @Before
     public void init(){
@@ -100,8 +96,6 @@ public class OmicHarmonizerTests {
 
     @Test
     public void Given_OmicSheet_When_AssemblyIs37_Then_returnAddRowToOutputWithCorrectSize() throws IOException {
-
-
         int expectedCol = 18;
         int chromoCol = 16;
         int seqStartCol = 17;
@@ -141,16 +135,15 @@ public class OmicHarmonizerTests {
     @Test
     public void Given_realHgCNAdataIsUsed_When_runLiftOverIsCalled_Then_pointsAreLiftedAndMerged() throws IOException {
 
-        // {"chr6",32188823,32188823,"6",32221046,32221046},
+        // {"chr6",32188823,32200000,"6",32221046,32232223},
 
         String cellTestValue = "10";
-
         String providedChromo = "chr6";
         String providedStartSeq = "32188823";
-        String providedSeqEnd = "32188823";
-
+        String providedSeqEnd = "32200000";
         String expectedChromo = "6";
         String expectedStartSeq = "32221046";
+        String expectedChromoEnd = "32232223";
 
         int assemblyCol = 16;
         int chromoCol = 17;
@@ -178,23 +171,18 @@ public class OmicHarmonizerTests {
 
         Assert.assertEquals(actualList.get(1).get(chromoCol), expectedChromo);
         Assert.assertEquals(actualList.get(1).get(seqStartCol), expectedStartSeq);
+        Assert.assertEquals(actualList.get(1).get(seqEndCol), expectedChromoEnd);
         assertArraysAreCopies(testData.get(1), actualList.get(1), 16);
     }
 
     @Test
     public void Given_realMUTnoENDSEQ_When_runLiftOverIsCalled_Then_EndSeqIsHasNoPOS() throws IOException {
-
         // {"chr6",32188823,32188823,"6",32221046,32221046},
-
         String cellTestValue = "10";
-
         String providedChromo = "chr6";
         String providedStartSeq = "32188823";
-
         String expectedChromo = "6";
         String expectedStartSeq = "32221046";
-
-
         int assemblyCol = 19;
         int chromoCol = 20;
         int seqStartCol = 21;
