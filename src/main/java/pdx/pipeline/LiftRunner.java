@@ -40,8 +40,10 @@ public class LiftRunner implements CommandLineRunner {
         parser.accepts("LIFT");
         parser.accepts("MUT");
         parser.accepts("CNA");
+        parser.accepts("DIR").withRequiredArg();
         OptionSet options = parser.parse(args);
 
+        if (options.has("DIR")) finderRootDir = (String) options.valueOf("DIR");
         if (options.has("CNA")) crawler.setCrawlerSetting(OmicHarmonizer.OMIC.CNA);
         if (options.has("MUT")) crawler.setCrawlerSetting(OmicHarmonizer.OMIC.MUT);
         if (options.has("LIFT"))runLiftOver();
@@ -49,6 +51,7 @@ public class LiftRunner implements CommandLineRunner {
 
     public void runLiftOver() throws IOException {
         System.out.println("Run directory: " + finderRootDir);
+
         List<File> omicFiles = crawler.run(new File(finderRootDir));
 
         omicFiles.forEach(f -> {
