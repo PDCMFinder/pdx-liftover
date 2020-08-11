@@ -71,7 +71,7 @@ public class PDXLiftOver {
     }
 
     private String changeStringToChainFormat(String chromo){
-        return chromo.toUpperCase().replaceAll("(?i)^([0-9]{1,2}|[xym]|Un).*$", "chr$1");
+        return chromo.toUpperCase().replaceAll("(?i)^(?:chr)?([0-9]{1,2}|[xym]|Un).*$", "chr$1");
     }
 
     private boolean notChainFormat(String chromo){

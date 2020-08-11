@@ -138,12 +138,12 @@ public class OmicHarmonizerTests {
         // {"chr6",32188823,32200000,"6",32221046,32232223},
 
         String cellTestValue = "10";
-        String providedChromo = "chr6";
-        String providedStartSeq = "32188823";
-        String providedSeqEnd = "32200000";
-        String expectedChromo = "6";
-        String expectedStartSeq = "32221046";
-        String expectedChromoEnd = "32232223";
+        String providedChromo = "chr17";
+        String providedStartSeq = "7565097";
+        String providedSeqEnd = "7590868";
+        String expectedChromo = "17";
+        String expectedStartSeq = "7661779";
+        String expectedChromoEnd = "7687550";
 
         int assemblyCol = 16;
         int chromoCol = 17;
