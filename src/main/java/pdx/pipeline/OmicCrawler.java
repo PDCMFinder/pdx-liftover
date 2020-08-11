@@ -90,7 +90,7 @@ public class OmicCrawler {
         providersData.forEach(f ->
             variantData.addAll
                     (Arrays.stream(f.listFiles())
-                            .filter(t -> t.getName().matches("(?i)_(mut|cna).+(xlsx|tsv|csv)"))
+                            .filter(t -> t.getName().matches("(?i)^.{0,25}_(mut|cna)\\.(xlsx|tsv|csv)"))
                             .collect(Collectors.toCollection(ArrayList::new)))
         );
         return variantData;

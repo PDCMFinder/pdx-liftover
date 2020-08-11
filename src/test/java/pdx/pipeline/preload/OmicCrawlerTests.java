@@ -53,10 +53,10 @@ public class OmicCrawlerTests {
         cnaFolder2 = Files.createDirectory(Paths.get(provider2.toString() + "/cna"));
         cytoFolder2 = Files.createDirectory(Paths.get(provider2.toString() + "/cyto"));
 
-        mut2 = Files.createFile(Paths.get(mutFolder2.toString() + "/_mut.tsv"));
+        mut2 = Files.createFile(Paths.get(mutFolder2.toString() + "/test_mut.tsv"));
         metadata2 = Files.createFile(Paths.get(provider2.toString() + "/metadata.xlsx"));
         cyto2 = Files.createFile(Paths.get(cytoFolder2.toString() + "/_cytogenetics.tsv"));
-        cna1 = Files.createFile(Paths.get(cnaFolder2.toString() + "/_cna.tsv"));
+        cna1 = Files.createFile(Paths.get(cnaFolder2.toString() + "/test_cna.tsv"));
     }
 
     @After
