@@ -60,8 +60,22 @@ public class PDXLiftOver {
         if(notChainFormat(chromo)) {
             if (matchesMitoCase(chromo))
                 formatedChromo = chromo.replaceAll(completeExpression, "chrM");
+            if (isNumericSexChromo(chromo)){
+                formatedChromo = formatNumericSexChromoToChain(chromo);
+            }
             else
                 formatedChromo = changeStringToChainFormat(chromo);
+        }
+        return formatedChromo;
+    }
+
+    private String formatNumericSexChromoToChain(String chromo){
+        String formatedChromo;
+        if (chromo.matches("^.*23")){
+            formatedChromo = "chrX";
+        }
+        else {
+            formatedChromo = "chrY";
         }
         return formatedChromo;
     }
@@ -72,6 +86,11 @@ public class PDXLiftOver {
 
     private String changeStringToChainFormat(String chromo){
         return chromo.toUpperCase().replaceAll("(?i)^(?:chr)?([0-9]{1,2}|[xym]|Un).*$", "chr$1");
+    }
+
+    private boolean isNumericSexChromo(String chromo){
+        return chromo.matches("^.*2[34]");
+
     }
 
     private boolean notChainFormat(String chromo){
