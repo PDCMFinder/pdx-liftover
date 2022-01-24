@@ -80,21 +80,6 @@ public class OmicHarmonizerTests {
     }
 
     @Test
-    public void Given_OmicSheet_When_AssemblyIsBlank_Then_returnOnlyHeader() throws IOException {
-
-        //Given
-        createHeadersWithAssemChromoAndStartSeq(17,18,19, MUTCOLUMNSIZE);
-        ArrayList<String> firstDataRow = (fillNewList("TEST",MUTCOLUMNSIZE));
-        firstDataRow.set(17, "");
-        testData.add(firstDataRow);
-
-        //When
-        int actualSize = harmonizer.runLiftOver(testData,"/tmp/TESTURI", OmicHarmonizer.OMIC.MUT).size();
-
-        Assert.assertEquals(1, actualSize);
-    }
-
-    @Test
     public void Given_OmicSheet_When_AssemblyIs37_Then_returnAddRowToOutputWithCorrectSize() throws IOException {
         int expectedCol = 18;
         int chromoCol = 16;
@@ -113,66 +98,6 @@ public class OmicHarmonizerTests {
         Assert.assertEquals(1, actualList.size());
         Assert.assertEquals(MUTCOLUMNSIZE,actualList.get(0).size());
 
-    }
-
-    @Test
-    public void Given_OmicSheet_When_AssemblyIs38_Then_OnlyHeaders() throws IOException {
-
-        int expectedCol = 18;
-
-        //Given
-        createHeadersWithAssemChromoAndStartSeq(10,11, 12, MUTCOLUMNSIZE);
-        ArrayList<String> firstDataRow = (fillNewList("TEST",MUTCOLUMNSIZE));
-        firstDataRow.set(expectedCol, "38");
-        testData.add(firstDataRow);
-
-        //When
-        ArrayList<ArrayList<String>> actualList = harmonizer.runLiftOver(testData,"/tmp/TESTURI", OmicHarmonizer.OMIC.MUT);
-
-        Assert.assertEquals(1, actualList.size());
-    }
-
-    @Test
-    public void Given_realHgCNAdataIsUsed_When_runLiftOverIsCalled_Then_pointsAreLiftedAndMerged() throws IOException {
-
-        // {"chr6",32188823,32200000,"6",32221046,32232223},
-
-        String cellTestValue = "10";
-        String providedChromo = "chr17";
-        String providedStartSeq = "7565097";
-        String providedSeqEnd = "7590868";
-        String expectedChromo = "17";
-        String expectedStartSeq = "7661779";
-        String expectedChromoEnd = "7687550";
-
-        int assemblyCol = 16;
-        int chromoCol = 17;
-        int seqStartCol = 18;
-        int seqEndCol = 19;
-
-        //Given
-        ArrayList<String> headers = fillNewList("HEADER",MUTCOLUMNSIZE);
-        headers.set(assemblyCol,assemblyHeader);
-        headers.set(chromoCol,chromoHeader);
-        headers.set(seqStartCol, seqStartHeader);
-        headers.set(seqEndCol, seqEndHeader);
-        testData.add(headers);
-
-
-        ArrayList<String> firstDataRow = (fillNewList(cellTestValue, CNACOLUMNSIZE));
-        firstDataRow.set(assemblyCol, "37");
-        firstDataRow.set(chromoCol, providedChromo);
-        firstDataRow.set(seqStartCol, providedStartSeq);
-        firstDataRow.set(seqEndCol, providedSeqEnd);
-        testData.add(firstDataRow);
-
-        //When
-        ArrayList<ArrayList<String>> actualList = harmonizer.runLiftOver(testData,"/tmp/TESTURI", OmicHarmonizer.OMIC.CNA);
-
-        Assert.assertEquals(actualList.get(1).get(chromoCol), expectedChromo);
-        Assert.assertEquals(actualList.get(1).get(seqStartCol), expectedStartSeq);
-        Assert.assertEquals(actualList.get(1).get(seqEndCol), expectedChromoEnd);
-        assertArraysAreCopies(testData.get(1), actualList.get(1), 16);
     }
 
     @Test

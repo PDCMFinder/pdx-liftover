@@ -35,11 +35,15 @@ public class OmicCrawler {
             if (whatUpDog.exists()) {
                 providerFolders = Arrays.asList(whatUpDog.listFiles());
             } else {
-                System.out.println("No Updog found. Default to folder search mode");
+                System.out.println("No Updog found. Default to provider root folder search mode");
                 providerFolders = new ArrayList<>();
                 providerFolders.add(rootDir);
             }
             providersData = returnMutAndCNASubFolders(providerFolders);
+            if (providerFolders.isEmpty()){
+                System.out.printf("No MUT or CNA folds found. Please provide the parent directory"
+                    + "of the MUT or CNA folders if not using Updog mode");
+            }
             variantData = getVariantdata(providersData);
         } else throw new IOException("Error root directory could not be found by the OmicCrawler");
         return variantData;
