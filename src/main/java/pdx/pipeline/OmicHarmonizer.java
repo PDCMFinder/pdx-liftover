@@ -22,7 +22,6 @@ public class OmicHarmonizer {
     private ArrayList<ArrayList<String>> outputSheet;
     private int chromosomeColumn;
     private int seqStartPositionCol = -1;
-    private int seqEndPositionCol = -1;
 
     private static final String CHROMOSOME = "chromosome";
     private static final String SEQSTARTPOS = "seq_start_position";
@@ -117,7 +116,7 @@ public class OmicHarmonizer {
         String rowChromosome = "";
         long rowStartPos = -1;
         long endPos = -1;
-        if(row.size() > chromosomeColumn && row.size() > seqStartPositionCol && row.size() > seqEndPositionCol) {
+        if(row.size() > chromosomeColumn && row.size() > seqStartPositionCol) {
                 rowChromosome = row.get(chromosomeColumn);
                 rowStartPos = getAndValidateSeqCoordinatesNum(row, seqStartPositionCol);
                 endPos = getSeqEndPosition(row);
@@ -138,10 +137,7 @@ public class OmicHarmonizer {
     }
 
     private long getSeqEndPosition(ArrayList<String> row) {
-        long endPos = -1;
-        if(omicType.equals(OMIC.CNA)) endPos = getAndValidateSeqCoordinatesNum(row, seqEndPositionCol);
-        else if(omicType.equals(OMIC.MUT)) endPos = getAndValidateSeqCoordinatesNum(row, seqStartPositionCol);
-        return endPos;
+        return getAndValidateSeqCoordinatesNum(row, seqStartPositionCol);
     }
 
     private void mergeLiftDataWithRowData(List<String> liftedData, ArrayList<String>row) {
