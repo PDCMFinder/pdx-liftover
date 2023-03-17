@@ -26,6 +26,7 @@ public class OmicHarmonizer {
 
     private static final String CHROMOSOME = "chromosome";
     private static final String SEQSTARTPOS = "seq_start_position";
+    private static final String SEQENDPOS = "seq_end_position";
     private static final String ERRORSTR = "ERROR LIFTING";
 
     private final PDXLiftOver lifter = new PDXLiftOver();
@@ -57,6 +58,9 @@ public class OmicHarmonizer {
     private void initHeaders() {
         chromosomeColumn = getColumnByHeader(CHROMOSOME);
         seqStartPositionCol = getColumnByHeader(SEQSTARTPOS);
+        if(omicType.name().equals("CNA")){
+            seqEndPositionCol = getColumnByHeader(SEQENDPOS);
+        }
     }
 
     private void buildLiftOverResults(String fileURI){
